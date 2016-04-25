@@ -2,9 +2,9 @@ package editortrees;
 
 import java.util.function.IntSupplier;
 
-import debughelp.DisplayableNodeWrapper;
+import debughelp.AbstractDisplayableNode;
 
-public class Node {
+public class Node extends AbstractDisplayableNode{
 
 	enum Code {
 		SAME, LEFT, RIGHT;
@@ -33,7 +33,7 @@ public class Node {
 	Node left, right, parent; // subtrees and parent
 	int rank; // inorder position of this node within its own subtree.
 	Code balance;
-	DisplayableNodeWrapper wrapper;
+	AbstractDisplayableNode wrapper;
 
 	public Node() {
 		this.balance = Code.SAME;
@@ -45,7 +45,7 @@ public class Node {
 		this.left = EditTree.NULL_NODE;
 		this.right = EditTree.NULL_NODE;
 		this.parent = EditTree.NULL_NODE;
-		this.wrapper = new DisplayableNodeWrapper(this);
+//		this.wrapper = new DisplayableNodeWrapper(this);
 	}
 
 	class Rank implements IntSupplier {
@@ -441,34 +441,24 @@ public class Node {
 		return this.left.size() + this.right.size() + 1;
 	}
 
-	public DisplayableNodeWrapper getDisplayableNodePart() {
-		return this.wrapper;
-	}
-
 	public boolean hasLeft() {
-		return this.left != EditTree.NULL_NODE;
+		return this != EditTree.NULL_NODE && this.left != EditTree.NULL_NODE;
 	}
 
 	public Node getLeft() {
-		if (this.left == EditTree.NULL_NODE) {
-			return null;
-		}
 		return this.left;
 	}
 
 	public boolean hasRight() {
-		return this.right != EditTree.NULL_NODE;
+		return this != EditTree.NULL_NODE && this.right != EditTree.NULL_NODE;
 	}
 
 	public Node getRight() {
-		if (this.right == EditTree.NULL_NODE) {
-			return null;
-		}
 		return this.right;
 	}
 
 	public boolean hasParent() {
-		return this.parent != EditTree.NULL_NODE;
+		return this != EditTree.NULL_NODE && this.parent != EditTree.NULL_NODE;
 	}
 
 	public Node getParent() {
@@ -481,5 +471,20 @@ public class Node {
 
 	public char getElement() {
 		return this.element;
+	}
+
+	@Override
+	public String getRankString() {
+		return Integer.toString(this.rank);
+	}
+
+	@Override
+	public String getBalanceString() {
+		return this.balance.toString();
+	}
+
+	@Override
+	public String getElementString() {
+		return Character.toString(this.element);
 	}
 }

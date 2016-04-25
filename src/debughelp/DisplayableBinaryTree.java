@@ -205,7 +205,7 @@ public class DisplayableBinaryTree extends JComponent {
 		g2.fill(new Rectangle2D.Double(this.width - 20, 80, 40, 5));
 		g2.fill(new Rectangle2D.Double(this.width - 25, 90, 50, 5));
 		// // RAISE THE BAR ^^^^^
-		DisplayableNodeWrapper current = this.tree.getRoot().getDisplayableNodePart();
+		AbstractDisplayableNode current = this.tree.getRoot();
 		// CURRENT.POINT = THE CENTER POINT, NOT THE UPPER LEFT CORNER
 		// System.out.println();
 		this.paintHelper(g2, current, this.nodeY);
@@ -220,9 +220,9 @@ public class DisplayableBinaryTree extends JComponent {
 	 * @param current
 	 * @param nodeY
 	 */
-	private void paintHelper(Graphics2D g2, DisplayableNodeWrapper current, double nodeY) {
+	private void paintHelper(Graphics2D g2, AbstractDisplayableNode current, double nodeY) {
 		// System.out.println(current.getNode().hasLeft());
-		if (current.getNode().hasLeft()) {
+		if (current.hasLeft()) {
 			this.paintHelper(g2, current.getLeft(), nodeY + this.yDistance); // recurse
 		}
 		// set up the node
@@ -232,7 +232,7 @@ public class DisplayableBinaryTree extends JComponent {
 		current.setCircleRadius(this.circleRadius);
 		current.displayNode(g2); // display the node by passing the graphics2D
 		this.nodeX += this.xDistance;
-		if (current.getNode().hasRight()) {
+		if (current.hasRight()) {
 			this.paintHelper(g2, current.getRight(), nodeY + this.yDistance); // recurse
 		}
 	}
@@ -242,23 +242,21 @@ public class DisplayableBinaryTree extends JComponent {
 	 * @param g2
 	 * @param current
 	 */
-	private void lineHelper(Graphics2D g2, DisplayableNodeWrapper current) {
+	private void lineHelper(Graphics2D g2, AbstractDisplayableNode current) {
 		if (current == null) {
 			return;
 		}
-		if (hasParents) {
-			if (current.getNode().hasParent()) {
-				this.drawParentArrow(g2, current);
-			}
+		if (current.hasParent()) {
+			this.drawParentArrow(g2, current);
 		}
 		// only if has left child
-		if (current.getLeft() != null) {
+		if (current.hasLeft()) {
 			// draw line arrow
 			this.drawFowardArrow(g2, current.getPoint(), current.getLeft().getPoint());
 			this.lineHelper(g2, current.getLeft()); // recurse
 		}
 		// only if has right child
-		if (current.getRight() != null) {
+		if (current.hasRight()) {
 			// draw line arrow
 			this.drawFowardArrow(g2, current.getPoint(), current.getRight().getPoint());
 			this.lineHelper(g2, current.getRight()); // recurse
@@ -275,7 +273,11 @@ public class DisplayableBinaryTree extends JComponent {
 	 * @param end
 	 *            center point of the child
 	 */
-	private void drawParentArrow(Graphics2D g2, DisplayableNodeWrapper node) {
+	private void drawParentArrow(Graphics2D g2, AbstractDisplayableNode node) {
+		if (!node.hasParent()) {
+			return; // no parent, then don't draw a parent arrow
+		}
+		System.out.println(node.getElementString());
 		Point2D.Double start = node.getPoint();
 		Point2D.Double end = node.getParent().getPoint();
 		g2.setColor(PARENT_ARROW_COLOR);
@@ -294,8 +296,7 @@ public class DisplayableBinaryTree extends JComponent {
 		g2.translate(0, this.circleRadius);
 		double arrowLength = start.distance(end) - 2 * this.circleRadius; // distance is from edge to edge
 		double arrowLengthSqrt = Math.sqrt(arrowLength); // scales better with the sqrt
-		Node dataNode = node.getNode();
-		if (dataNode == dataNode.getParent().getLeft() || dataNode == dataNode.getParent().getRight()) {
+		if (node == node.getParent().getLeft() || node == node.getParent().getRight()) {
 			Line2D.Double line = new Line2D.Double(0, 0, 0, arrowLength - arrowLengthSqrt * 2);
 			g2.draw(line);
 		}

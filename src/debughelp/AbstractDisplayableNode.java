@@ -17,61 +17,32 @@ import editortrees.Node;
  * node.getElement()
  */
 
-public class DisplayableNodeWrapper {
+abstract public class AbstractDisplayableNode {
 	// *****************************************************************************
 	private static Color CIRCLE_COLOR = Color.WHITE;
 	// lightish green to keep in line with our stormy color scheme
 	private static Color TEXT_COLOR = new Color(0x66FFB2);
 	private Point.Double point;
 	private double radius;
-	private Node node;
 
 	// ******************************************************************************
-
-	/**
-	 * only sets the graphical related fields
-	 * 
-	 * @param node
-	 */
-	public DisplayableNodeWrapper(Node node) {
+	
+	public AbstractDisplayableNode() {
 		this.point = null;
-		this.radius = -10;
-		this.node = node;
-	}
-
-	/**
-	 * gets the displayable part of the left child
-	 * @return
-	 */
-	public DisplayableNodeWrapper getLeft() {
-		if (this.node.left != null) {
-			return this.node.left.getDisplayableNodePart();
-		}
-		return null;
-	}
-
-	/**
-	 * gets the displayable part of the right child
-	 * @return
-	 */
-	public DisplayableNodeWrapper getRight() {
-		if (this.node.right != null) {
-			return this.node.right.getDisplayableNodePart();
-		}
-		return null;
+		this.radius = -1;
 	}
 	
-	/**
-	 * gets the displayable part of the parent
-	 * @return
-	 */
-	public DisplayableNodeWrapper getParent() {
-		return this.node.getParent().getDisplayableNodePart();
-	}
+	abstract public boolean hasLeft();
+	abstract public boolean hasRight();
+	abstract public boolean hasParent();
+
+	abstract public AbstractDisplayableNode getLeft();
+	abstract public AbstractDisplayableNode getRight();
+	abstract public AbstractDisplayableNode getParent();
 	
-	public Node getNode() {
-		return this.node;
-	}
+	abstract public String getRankString();
+	abstract public String getBalanceString();
+	abstract public String getElementString();
 	
 	/**
 	 * sets this.point to the new point
@@ -132,26 +103,20 @@ public class DisplayableNodeWrapper {
 		g2.setColor(TEXT_COLOR);
 
 		// finds how much to shift the string to center the letter
-		String rank = this.node.getRank() + "";
+		String rank = this.getRankString();
 		Rectangle2D bounds = g2.getFontMetrics().getStringBounds(rank, g2);
 		int upperLeftX = (int) (this.point.x - bounds.getWidth() / 2);
 		int upperLeftY = (int) (this.point.y - 1 * bounds.getHeight() / 3); // don't know why this 1/3 works so good
 		g2.drawString(rank, upperLeftX, upperLeftY);
 		// System.out.println(this.balance);
 
-		String balance;
-		if (this.node.getBalance() == null) {
-			 System.out.println("bad");
-			balance = "null";
-		} else {
-			balance = this.node.getBalance().toString();
-		}
+		String balance = this.getBalanceString();
 		bounds = g2.getFontMetrics().getStringBounds(balance, g2);
 		upperLeftX = (int) (this.point.x - bounds.getWidth() / 2);
 		upperLeftY = (int) (this.point.y + 1 * bounds.getHeight() / 4); // don't know why this 1/3 works so good
 		g2.drawString(balance, upperLeftX, upperLeftY);
 
-		String text = String.valueOf(this.node.getElement());
+		String text = String.valueOf(this.getElementString());
 		bounds = g2.getFontMetrics().getStringBounds(text, g2);
 		upperLeftX = (int) (this.point.x - bounds.getWidth() / 2);
 		upperLeftY = (int) (this.point.y + 5 * bounds.getHeight() / 6); // don't know why this 1/3 works so good
