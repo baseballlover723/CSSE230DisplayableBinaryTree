@@ -442,7 +442,7 @@ public class Node extends AbstractDisplayableNode{
 	}
 
 	public boolean hasLeft() {
-		return this != EditTree.NULL_NODE && this.left != EditTree.NULL_NODE;
+		return this.left != EditTree.NULL_NODE;
 	}
 
 	public Node getLeft() {

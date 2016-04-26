@@ -52,11 +52,11 @@ public class DisplayableBinaryTree extends JComponent {
 	public static boolean hasParents = true;
 
 	// a stormy gray background to be easy on the eyes at night, and set a stormy mood.
-	private static final Color BACKGROUND_COLOR = Color.DARK_GRAY;
+	public static final Color BACKGROUND_COLOR = Color.DARK_GRAY;
 	// a light blue color, keeping in line with the stormy color scheme
-	private static final Color FOWARD_ARROW_COLOR = new Color(0x3399FF);
-	private static final Color PARENT_ARROW_COLOR = new Color(0x77619A);
-	private static final String FONT_NAME = "Comic Sans MS"; // comics sans for the win
+	public static final Color FOWARD_ARROW_COLOR = new Color(0x3399FF);
+	public static final Color PARENT_ARROW_COLOR = new Color(0x77619A);
+	public static final String FONT_NAME = "Comic Sans MS"; // comics sans for the win
 	// private static final String FONT_NAME = "ESSTIXFifteen"; // change if you don't want to make it look cool
 	// private static final String FONT_NAME = "ESSTIXThirteen"; // change if you don't want to make it look cool
 	// private static final String FONT_NAME = "Jokerman"; // change if you don't want to make it look cool
@@ -208,153 +208,11 @@ public class DisplayableBinaryTree extends JComponent {
 		AbstractDisplayableNode current = this.tree.getRoot();
 		// CURRENT.POINT = THE CENTER POINT, NOT THE UPPER LEFT CORNER
 		// System.out.println();
-		this.paintHelper(g2, current, this.nodeY);
-		this.lineHelper(g2, current);
+		current.paintHelper(g2, this.nodeX, this.nodeY, this.xDistance, this.yDistance, this.circleRadius);
+		current.lineHelper(g2);
+//		this.paintHelper(g2, current, this.nodeY);
+//		this.lineHelper(g2, current);
 		// System.out.println("DONE");
-	}
-
-	/**
-	 * helper method to paint nodes
-	 * 
-	 * @param g2
-	 * @param current
-	 * @param nodeY
-	 */
-	private void paintHelper(Graphics2D g2, AbstractDisplayableNode current, double nodeY) {
-		// System.out.println(current.getNode().hasLeft());
-		if (current.hasLeft()) {
-			this.paintHelper(g2, current.getLeft(), nodeY + this.yDistance); // recurse
-		}
-		// set up the node
-		current.setPoint(this.nodeX, nodeY);
-		// System.out.println(current.getNode().getElement());
-		// System.out.println("(" + this.nodeX + ", " + nodeY + ")");
-		current.setCircleRadius(this.circleRadius);
-		current.displayNode(g2); // display the node by passing the graphics2D
-		this.nodeX += this.xDistance;
-		if (current.hasRight()) {
-			this.paintHelper(g2, current.getRight(), nodeY + this.yDistance); // recurse
-		}
-	}
-
-	/**
-	 * 
-	 * @param g2
-	 * @param current
-	 */
-	private void lineHelper(Graphics2D g2, AbstractDisplayableNode current) {
-		if (current == null) {
-			return;
-		}
-		if (current.hasParent()) {
-			this.drawParentArrow(g2, current);
-		}
-		// only if has left child
-		if (current.hasLeft()) {
-			// draw line arrow
-			this.drawFowardArrow(g2, current.getPoint(), current.getLeft().getPoint());
-			this.lineHelper(g2, current.getLeft()); // recurse
-		}
-		// only if has right child
-		if (current.hasRight()) {
-			// draw line arrow
-			this.drawFowardArrow(g2, current.getPoint(), current.getRight().getPoint());
-			this.lineHelper(g2, current.getRight()); // recurse
-		}
-	}
-
-	/**
-	 * makes the frame take an arrow to the knee
-	 * 
-	 * @param g2
-	 *            graphics
-	 * @param start
-	 *            center point of the parent
-	 * @param end
-	 *            center point of the child
-	 */
-	private void drawParentArrow(Graphics2D g2, AbstractDisplayableNode node) {
-		if (!node.hasParent()) {
-			return; // no parent, then don't draw a parent arrow
-		}
-		System.out.println(node.getElementString());
-		Point2D.Double start = node.getPoint();
-		Point2D.Double end = node.getParent().getPoint();
-		g2.setColor(PARENT_ARROW_COLOR);
-		double SIZE_MULTIPLIER = 1.5;
-		AffineTransform transform = g2.getTransform(); // save graphics state to restore later
-		double angle = 0;
-		try {
-			angle = Math.atan2(end.getY() - start.getY(), end.getX() - start.getX());
-		} catch (NullPointerException e) {
-			// eh, this probability doesn't matter that much
-			return;
-		}
-		g2.translate(end.getX(), end.getY()); // move the center of the child node
-		g2.rotate(angle + Math.PI / 2.0); // rotate
-		// move the edge of the circle
-		g2.translate(0, this.circleRadius);
-		double arrowLength = start.distance(end) - 2 * this.circleRadius; // distance is from edge to edge
-		double arrowLengthSqrt = Math.sqrt(arrowLength); // scales better with the sqrt
-		if (node == node.getParent().getLeft() || node == node.getParent().getRight()) {
-			Line2D.Double line = new Line2D.Double(0, 0, 0, arrowLength - arrowLengthSqrt * 2);
-			g2.draw(line);
-		}
-
-		Path2D.Double arrowHead = new Path2D.Double(); // paths are cool
-		// draws the arrow head
-		arrowHead.moveTo(0, 0);
-		arrowHead.lineTo(-arrowLengthSqrt / SIZE_MULTIPLIER, 2 * arrowLengthSqrt / SIZE_MULTIPLIER);
-		arrowHead.lineTo(arrowLengthSqrt / SIZE_MULTIPLIER, 2 * arrowLengthSqrt / SIZE_MULTIPLIER);
-		arrowHead.closePath();
-
-		g2.fill(arrowHead);
-		g2.setTransform(transform); // restores the graphics state
-	}
-
-	/**
-	 * makes the frame take an arrow to the knee
-	 * 
-	 * @param g2
-	 *            graphics
-	 * @param start
-	 *            center point of the parent
-	 * @param end
-	 *            center point of the child
-	 */
-	private void drawFowardArrow(Graphics2D g2, Point2D.Double start, Point2D.Double end) {
-		g2.setColor(FOWARD_ARROW_COLOR);
-		AffineTransform transform = g2.getTransform(); // save graphics state to restore later
-		// get the correct rotation angle
-		if (end == null || start == null) {
-			// System.out.println("NULL ANGLE");
-		}
-		double angle = 0;
-		try {
-			angle = Math.atan2(end.getY() - start.getY(), end.getX() - start.getX());
-		} catch (NullPointerException e) {
-			// silently ignore, cause you know, YOLO
-			// but really though, there is a small (1 in ~1000) chance of one of these being null
-			// and its better for it to just skip this arrow then actually fix it since it will get redrawn
-			return;
-		}
-		g2.translate(end.getX(), end.getY()); // move the center of the child node
-		g2.rotate(angle + Math.PI / 2.0); // rotate
-		g2.translate(0, this.circleRadius); // move the edge of the circle
-		double arrowLength = start.distance(end) - 2 * this.circleRadius; // distance is from edge to edge
-		Line2D.Double line = new Line2D.Double(0, 0, 0, arrowLength);
-		g2.draw(line);
-
-		Path2D.Double arrowHead = new Path2D.Double(); // paths are cool
-		double arrowLengthSqrt = Math.sqrt(arrowLength); // scales better with the sqrt
-		// draws the arrow head
-		arrowHead.moveTo(0, 0);
-		arrowHead.lineTo(-arrowLengthSqrt, arrowLengthSqrt * 2);
-		arrowHead.lineTo(arrowLengthSqrt, arrowLengthSqrt * 2);
-		arrowHead.closePath();
-
-		g2.fill(arrowHead);
-		g2.setTransform(transform); // restores the graphics state
 	}
 
 	/**
