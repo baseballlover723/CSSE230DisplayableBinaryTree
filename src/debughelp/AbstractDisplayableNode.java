@@ -25,6 +25,10 @@ abstract public class AbstractDisplayableNode {
 	private static Color CIRCLE_COLOR = Color.WHITE;
 	// lightish green to keep in line with our stormy color scheme
 	private static Color TEXT_COLOR = new Color(0x66FFB2);
+	// a light blue color, keeping in line with the stormy color scheme
+	public static final Color FOWARD_ARROW_COLOR = new Color(0x3399FF);
+	public static final Color PARENT_ARROW_COLOR = new Color(0x77619A);
+
 	private double x;
 	private double y;
 	private double radius;
@@ -64,11 +68,16 @@ abstract public class AbstractDisplayableNode {
 	abstract public String getElementString();
 
 	/**
-	 * helper method to paint nodes
+	 * this method paints the nodes and arrows on the given graphics object at the correct position with the given
+	 * distances between the nodes at the given radius. coordinates are for the center of the node.
 	 * 
 	 * @param g2
-	 * @param current
+	 * @param x
 	 * @param y
+	 * @param deltaX
+	 * @param deltaY
+	 * @param radius
+	 * @return
 	 */
 	protected double paintHelper(Graphics2D g2, double x, double y, double deltaX, double deltaY, double radius) {
 		if (this.hasLeft()) {
@@ -79,16 +88,24 @@ abstract public class AbstractDisplayableNode {
 		this.y = y;
 		this.radius = radius;
 		this.drawNode(g2);
+		if (this.hasLeft()) {
+			this.drawFowardArrow(g2, this.getLeft());
+		}
+		if (this.hasParent()) {
+			this.drawParentArrow(g2);
+		}
+
 		x += deltaX;
 		if (this.hasRight()) {
 			// recurse updating the x position each time you draw a node
 			x = this.getRight().paintHelper(g2, x, y + deltaY, deltaX, deltaY, radius);
+			this.drawFowardArrow(g2, this.getRight());
 		}
 		return x;
 	}
 
 	/**
-	 * REQUIRES the point to already been set draws the node on the current Graphics2D object
+	 * REQUIRES the point to already been set. draws the node on the current Graphics2D object
 	 * 
 	 * @param g2
 	 */
@@ -106,6 +123,7 @@ abstract public class AbstractDisplayableNode {
 
 	/**
 	 * draws the string form of the nodes rank inside of the node
+	 * 
 	 * @param g2
 	 */
 	private void drawRank(Graphics2D g2) {
@@ -120,6 +138,7 @@ abstract public class AbstractDisplayableNode {
 
 	/**
 	 * draws the string form of the nodes balance inside of the node
+	 * 
 	 * @param g2
 	 */
 	private void drawBalance(Graphics2D g2) {
@@ -132,9 +151,9 @@ abstract public class AbstractDisplayableNode {
 		g2.drawString(balance, upperLeftX, upperLeftY);
 	}
 
-	
 	/**
 	 * draws the string form of the nodes value inside of the node
+	 * 
 	 * @param g2
 	 */
 	private void drawElement(Graphics2D g2) {
@@ -148,26 +167,6 @@ abstract public class AbstractDisplayableNode {
 	}
 
 	/**
-	 * draws the lines between the nodes on the given graphics object. Assumes the nodes have already been drawn and
-	 * have valid points
-	 * 
-	 * @param g2
-	 */
-	protected void lineHelper(Graphics2D g2) {
-		if (this.hasParent()) {
-			this.drawParentArrow(g2);
-		}
-		if (this.hasLeft()) {
-			this.drawFowardArrow(g2, this.getLeft());
-			this.getLeft().lineHelper(g2); // recurse
-		}
-		if (this.hasRight()) {
-			this.drawFowardArrow(g2, this.getRight());
-			this.getRight().lineHelper(g2); // recurse
-		}
-	}
-
-	/**
 	 * draws a parent arrow on the given graphics object to this nodes parent
 	 * 
 	 * @param g2
@@ -178,14 +177,13 @@ abstract public class AbstractDisplayableNode {
 		AffineTransform transform = g2.getTransform(); // save graphics state to restore later
 		this.moveGraphicsToEdge(g2, parent);
 		double arrowLength = this.distanceTo(parent) - 2 * this.radius; // distance is from edge to edge
+		boolean doubleArrow = false;
 		if (this == this.getParent().getLeft() || this == this.getParent().getRight()) {
-			// if there is a child arrow and a parent arrow on the same line,
-			// shorten the parent arrow so it doesn't go through the child arrowhead
-			double shortenAmount = 2 * Math.sqrt(Math.abs(arrowLength)) * (arrowLength < 0 ? -1 : 1);
-			arrowLength -= shortenAmount;
+			// if there is a child arrow and a parent arrow on the same line, cut line part in half
+			doubleArrow = true;
 		}
 
-		this.drawArrow(g2, DisplayableBinaryTree.PARENT_ARROW_COLOR, arrowLength, sizeMultiplier);
+		this.drawArrow(g2, PARENT_ARROW_COLOR, arrowLength, sizeMultiplier, doubleArrow);
 
 		g2.setTransform(transform); // restores the graphics state
 	}
@@ -201,8 +199,12 @@ abstract public class AbstractDisplayableNode {
 		AffineTransform transform = g2.getTransform(); // save graphics state to restore later
 		moveGraphicsToEdge(g2, end);
 		double arrowLength = this.distanceTo(end) - 2 * this.radius; // distance is from edge to edge
+		boolean doubleArrow = false;
+		if (this.getLeft() == end || this.getRight() == end) {
+			doubleArrow = true;
+		}
 
-		this.drawArrow(g2, DisplayableBinaryTree.FOWARD_ARROW_COLOR, arrowLength, sizeMultiplier);
+		this.drawArrow(g2, FOWARD_ARROW_COLOR, arrowLength, sizeMultiplier, doubleArrow);
 
 		g2.setTransform(transform); // restores the graphics state
 	}
@@ -224,21 +226,23 @@ abstract public class AbstractDisplayableNode {
 
 	/**
 	 * draws an arrow on the graphics object with the given length and color and with a given size multiplier. Assumes
-	 * the graphics object starts at the edge of the node, pointing towards the destination node
+	 * the graphics object starts at the edge of the node, pointing towards the destination node. If there is multiple
+	 * lines then it will have a half length stem
 	 * 
 	 * @param g2
 	 * @param color
 	 * @param length
 	 * @param sizeMultiplier
+	 * @param doubleLine
 	 */
-	private void drawArrow(Graphics2D g2, Color color, double length, double sizeMultiplier) {
+	private void drawArrow(Graphics2D g2, Color color, double length, double sizeMultiplier, boolean doubleLine) {
 		g2.setColor(color);
 		if (length < 0) {
 			// draw the arrow the right way
 			g2.rotate(Math.PI);
 			length *= -1;
 		}
-		Line2D.Double line = new Line2D.Double(0, 0, 0, length);
+		Line2D.Double line = new Line2D.Double(0, 0, 0, (doubleLine ? length / 2.0 : length));
 		g2.draw(line);
 
 		Path2D.Double arrowHead = new Path2D.Double();

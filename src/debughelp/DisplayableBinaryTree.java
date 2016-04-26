@@ -47,15 +47,13 @@ import editortrees.Node;
  * @author Philip Ross, 2014.
  */
 public class DisplayableBinaryTree extends JComponent {
+	private static final long serialVersionUID = 6527873423891440301L;
 	public static Node NULL_NODE = null;
 	// do you have parent nodes?
 	public static boolean hasParents = true;
 
 	// a stormy gray background to be easy on the eyes at night, and set a stormy mood.
 	public static final Color BACKGROUND_COLOR = Color.DARK_GRAY;
-	// a light blue color, keeping in line with the stormy color scheme
-	public static final Color FOWARD_ARROW_COLOR = new Color(0x3399FF);
-	public static final Color PARENT_ARROW_COLOR = new Color(0x77619A);
 	public static final String FONT_NAME = "Comic Sans MS"; // comics sans for the win
 	// private static final String FONT_NAME = "ESSTIXFifteen"; // change if you don't want to make it look cool
 	// private static final String FONT_NAME = "ESSTIXThirteen"; // change if you don't want to make it look cool
@@ -122,6 +120,12 @@ public class DisplayableBinaryTree extends JComponent {
 		// add the tree to the frame
 		this.frame.getContentPane().add(this);
 		this.frame.setVisible(visable);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void close() {
@@ -209,7 +213,7 @@ public class DisplayableBinaryTree extends JComponent {
 		// CURRENT.POINT = THE CENTER POINT, NOT THE UPPER LEFT CORNER
 		// System.out.println();
 		current.paintHelper(g2, this.nodeX, this.nodeY, this.xDistance, this.yDistance, this.circleRadius);
-		current.lineHelper(g2);
+//		current.lineHelper(g2);
 //		this.paintHelper(g2, current, this.nodeY);
 //		this.lineHelper(g2, current);
 		// System.out.println("DONE");
