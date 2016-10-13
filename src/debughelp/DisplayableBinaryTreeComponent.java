@@ -1,5 +1,4 @@
 package debughelp;
-//package debughelp;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -8,49 +7,19 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-import editortrees.EditTree;
-import editortrees.Node;
 
-/* dependencies DisplayableTree:
- * 	Node:
- * 			hasLeft
- * 			hasRight
- * 			getLeft
- * 			getRight
- * 			hasParent (if using parents)
- * 			getParent (if using parents)
- * 
- * 	EditTree: 
- * 			constructors need booleans
- * 			displayable in boolean constructors
- * 			O(n) height method that is not dependent on balance codes or rank
- * 			O(n) size method that is not dependent on balance codes or rank
- * 	DisplayableNode:
- * 		node.getRank()
- * 		node.getBalance()
- * 		node.getBalance().toString()
- * 		node.getElement()
- */
-
-/**
- * A wrapper class for binary trees that can display the wrapped tree in a window.
- * 
- * @author Philip Ross, 2014.
- */
-public class DisplayableBinaryTree extends JComponent {
-	private static final long serialVersionUID = 6527873423891440301L;
-	public static Node NULL_NODE = null;
-	// do you have parent nodes?
-	public static boolean hasParents = true;
+public class DisplayableBinaryTreeComponent extends JComponent {
+	private static final long serialVersionUID = 2737198941294146621L;
+	private AbstractDisplayableBinaryTree tree;
+	private static final int DEFAULT_WIDTH = 960;
+	private static final int DEFAULT_HEIGHT = 1080;
+	
 
 	// a stormy gray background to be easy on the eyes at night, and set a stormy mood.
 	public static final Color BACKGROUND_COLOR = Color.DARK_GRAY;
@@ -59,9 +28,9 @@ public class DisplayableBinaryTree extends JComponent {
 	// private static final String FONT_NAME = "ESSTIXThirteen"; // change if you don't want to make it look cool
 	// private static final String FONT_NAME = "Jokerman"; // change if you don't want to make it look cool
 
+
 	private int width;
 	private int height;
-	private EditTree tree;
 	private JFrame frame;
 	private double xDistance;
 	private double circleRadius;
@@ -70,80 +39,13 @@ public class DisplayableBinaryTree extends JComponent {
 	private double nodeY;
 	private double angle;
 	private boolean goingCrazy;
+	private AtomicBoolean shouldRun;
 
-	/**
-	 * Constructs a new displayable binary tree, set to default to the given window size for display..
-	 * 
-	 * @param tree
-	 * @param windowWidth
-	 *            in pixels
-	 * @param windowHeight
-	 *            in pixels
-	 */
-	public DisplayableBinaryTree(EditTree tree, int windowWidth, int windowHeight, boolean visable) {
-		this.angle = 0;
-		this.width = windowWidth;
-		this.height = windowHeight;
-		this.tree = tree;
+	public DisplayableBinaryTreeComponent(AbstractDisplayableBinaryTree editorTree) {
+		this.tree = editorTree;
 		// makes the size of the nodes oscillate
 		this.goingCrazy = Math.random() < 0.05;
-		this.show(visable);
-		Runnable repainter = new Runnable() {
-			@Override
-			public void run() {
-				try {
-					while (true) {
-						Thread.sleep(10);
-						repaint();
-					}
-				} catch (InterruptedException exception) {
-					// Reports interrupt
-				}
-			}
-		};
-		new Thread(repainter).start();
-	}
-
-	@Override
-	public void show(boolean visable) {
-		if (this.frame != null) {
-			this.frame.toFront();
-			return;
-		}
-		this.frame = new JFrame();
-		this.frame.setFocusable(true);
-		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.frame.setMinimumSize(new Dimension(this.tree.slowSize() * 20 + 18, this.tree.slowHeight() * 20 + 45));
-		this.frame.setSize(new Dimension(this.width, this.height));
-		// set the background color to a stormy gray
-		this.frame.getContentPane().setBackground(BACKGROUND_COLOR);
-		// add the tree to the frame
-		this.frame.getContentPane().add(this);
-		this.frame.setVisible(visable);
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	public void close() {
-		this.frame.dispose();
-	}
-
-	/**
-	 * Sets the default size for the next window displayed.
-	 * 
-	 * @param windowWidth
-	 *            in pixels
-	 * @param windowHeight
-	 *            in pixels
-	 */
-	@Override
-	public void setSize(int windowWidth, int windowHeight) {
-		this.width = windowWidth;
-		this.height = windowHeight;
+		this.shouldRun = new AtomicBoolean(false);
 	}
 
 	@Override
@@ -213,39 +115,66 @@ public class DisplayableBinaryTree extends JComponent {
 		// CURRENT.POINT = THE CENTER POINT, NOT THE UPPER LEFT CORNER
 		// System.out.println();
 		current.paintHelper(g2, this.nodeX, this.nodeY, this.xDistance, this.yDistance, this.circleRadius);
-//		current.lineHelper(g2);
-//		this.paintHelper(g2, current, this.nodeY);
-//		this.lineHelper(g2, current);
 		// System.out.println("DONE");
+	}
+	
+	public void show(boolean visable) {
+		if (this.frame != null) {
+			this.frame.toFront();
+			return;
+		}
+		this.frame = new JFrame();
+		this.frame.setFocusable(true);
+		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.frame.setMinimumSize(new Dimension(this.tree.slowSize() * 20 + 18, this.tree.slowHeight() * 20 + 45));
+		System.out.println(new Dimension(this.tree.slowSize() * 20 + 18, this.tree.slowHeight() * 20 + 45));
+		this.frame.setSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+//		System.out.println(new Dimension(this.width, this.height));
+		// set the background color to a stormy gray
+		this.frame.getContentPane().setBackground(BACKGROUND_COLOR);
+		// add the tree to the frame
+		this.frame.getContentPane().add(this);
+		this.frame.setVisible(visable);
+		this.frame.toFront();
+		this.shouldRun.set(true);
+		Runnable repainter = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					while (shouldRun.get()) {
+						Thread.sleep(10);
+						repaint();
+					}
+				} catch (InterruptedException exception) {
+					// Reports interrupt
+				}
+			}
+		};
+		new Thread(repainter).start();
+
 	}
 
 	/**
-	 * returns a string that gives the given time difference in easily read time units
-	 * 
-	 * @param time
-	 * @return
+	 * closes the tree window still keeps all the data and you can still reshow
+	 * the tree with the show method
 	 */
-	public static String getTimeUnits(long time) {
-		double newTime = time;
-		if (time < 1000) {
-			return String.format("%d NanoSeconds", time);
-		}
-		newTime = time / 1000.0;
-		if (newTime < 1000) {
-			return String.format("%f MicroSeconds", newTime);
-		}
-		newTime /= 1000.0;
-		if (newTime < 1000) {
-			return String.format("%f MiliSeconds", newTime);
-		}
-		newTime /= 1000.0;
-		if (newTime < 300) {
-			return String.format("%f Seconds", newTime);
-		}
-		newTime /= 60.0;
-		if (newTime < 180) {
-			return String.format("%f Minutes", newTime);
-		}
-		return String.format("%f Hours", newTime / 60.0);
+	public void close() {
+		shouldRun.set(false);
+		this.frame.dispose();
 	}
+
+	/**
+	 * Sets the default size for the next window displayed.
+	 * 
+	 * @param windowWidth
+	 *            in pixels
+	 * @param windowHeight
+	 *            in pixels
+	 */
+	@Override
+	public void setSize(int windowWidth, int windowHeight) {
+		this.width = windowWidth;
+		this.height = windowHeight;
+	}
+
 }

@@ -50,21 +50,16 @@ abstract public class AbstractDisplayableNode {
 	}
 
 	abstract public boolean hasLeft();
-
-	abstract public boolean hasRight();
-
-	abstract public boolean hasParent();
-
 	abstract public AbstractDisplayableNode getLeft();
 
+	abstract public boolean hasRight();
 	abstract public AbstractDisplayableNode getRight();
 
+	abstract public boolean hasParent();
 	abstract public AbstractDisplayableNode getParent();
 
 	abstract public String getRankString();
-
 	abstract public String getBalanceString();
-
 	abstract public String getElementString();
 
 	/**
@@ -197,7 +192,7 @@ abstract public class AbstractDisplayableNode {
 	private void drawFowardArrow(Graphics2D g2, AbstractDisplayableNode end) {
 		double sizeMultiplier = 1;
 		AffineTransform transform = g2.getTransform(); // save graphics state to restore later
-		moveGraphicsToEdge(g2, end);
+		this.moveGraphicsToEdge(g2, end);
 		double arrowLength = this.distanceTo(end) - 2 * this.radius; // distance is from edge to edge
 		boolean doubleArrow = false;
 		if (this.getLeft() == end || this.getRight() == end) {
@@ -267,5 +262,4 @@ abstract public class AbstractDisplayableNode {
 		double dy = this.y - end.getY();
 		return Math.sqrt(dx * dx + dy * dy);
 	}
-
 }

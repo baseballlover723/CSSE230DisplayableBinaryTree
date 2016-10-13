@@ -1,16 +1,16 @@
 package editortrees;
 
-import debughelp.DisplayableBinaryTree;
+import debughelp.AbstractDisplayableBinaryTree;
 
 // A height-balanced binary tree with rank that could be the basis for a text editor.
 
-public class EditTree {
+public class EditTree extends AbstractDisplayableBinaryTree{
 
 	public Node root;
 	public int rotCount = 0;
 	final static Node NULL_NODE = new Node();
 	public boolean rootChanged;
-	public DisplayableBinaryTree display;
+	public AbstractDisplayableBinaryTree display;
 
 	/**
 	 * Construct an empty tree
@@ -318,24 +318,5 @@ public class EditTree {
 
 	public int slowSize() {
 		return this.root.size();
-	}
-
-	public void show() {
-		if (this.display == null) {
-			this.display = new DisplayableBinaryTree(this, 960, 1080, true);
-		} else {
-			this.display.show(true);
-		}
-
-	}
-
-	/**
-	 * closes the tree window still keeps all the data and you can still reshow
-	 * the tree with the show method
-	 */
-	public void close() {
-		if (this.display != null) {
-			this.display.close();
-		}
 	}
 }
