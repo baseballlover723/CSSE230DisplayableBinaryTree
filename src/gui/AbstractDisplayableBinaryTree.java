@@ -1,4 +1,4 @@
-package debughelp;
+package gui;
 
 /**
  * An abstract class for binary trees whose subclasses can be displayed in a flexible, auto-sizing GUI.

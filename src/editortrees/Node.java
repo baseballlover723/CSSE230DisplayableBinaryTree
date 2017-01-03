@@ -2,7 +2,7 @@ package editortrees;
 
 import java.util.function.IntSupplier;
 
-import debughelp.AbstractDisplayableNode;
+import gui.AbstractDisplayableNode;
 
 public class Node extends AbstractDisplayableNode{
 
