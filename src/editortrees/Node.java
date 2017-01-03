@@ -484,7 +484,7 @@ public class Node extends AbstractDisplayableNode{
 	}
 
 	@Override
-	public String getElementString() {
+	public String getDataString() {
 		return Character.toString(this.element);
 	}
 }

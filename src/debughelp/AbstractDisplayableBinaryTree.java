@@ -1,86 +1,53 @@
 package debughelp;
-//package debughelp;
-
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-
-import editortrees.EditTree;
-import editortrees.Node;
-
-/* dependencies DisplayableTree:
- * 	Node:
- * 			hasLeft
- * 			hasRight
- * 			getLeft
- * 			getRight
- * 			hasParent (if using parents)
- * 			getParent (if using parents)
- * 
- * 	EditTree: 
- * 			constructors need booleans
- * 			displayable in boolean constructors
- * 			O(n) height method that is not dependent on balance codes or rank
- * 			O(n) size method that is not dependent on balance codes or rank
- * 	DisplayableNode:
- * 		node.getRank()
- * 		node.getBalance()
- * 		node.getBalance().toString()
- * 		node.getElement()
- */
 
 /**
- * A wrapper class for binary trees that can display the wrapped tree in a window.
+ * An abstract class for binary trees whose subclasses can be displayed in a flexible, auto-sizing GUI.
  * 
  * @author Philip Ross, 2014.
  */
 abstract public class AbstractDisplayableBinaryTree {
-	private static final long serialVersionUID = 6527873423891440301L;
-	public static Node NULL_NODE = null;
-	// do you have parent nodes?
-	public static boolean hasParents = true;
-
-
 	private DisplayableBinaryTreeComponent component;
 
 	/**
-	 * Constructs a new displayable binary tree, set to default to the given window size for display..
-	 * 
-	 * @param tree
-	 * @param windowWidth
-	 *            in pixels
-	 * @param windowHeight
-	 *            in pixels
+	 * Constructs a new displayable binary tree
 	 */
 	public AbstractDisplayableBinaryTree() {
 		this.component = new DisplayableBinaryTreeComponent(this);
 	}
-	
+
+	/**
+	 * Determines the height of the binary tree in O(n) time. Used to always correctly display the binary tree.
+	 * 
+	 * @return
+	 */
 	abstract public int slowHeight();
+
+	/**
+	 * Determines the number of nodes in the binary tree in O(n) time. Used to always correctly display the binary tree.
+	 * 
+	 * @return
+	 */
 	abstract public int slowSize();
+
+	/**
+	 * Returns the root of the binary tree.
+	 * @return
+	 */
 	abstract public AbstractDisplayableNode getRoot();
 
+	/**
+	 * Shows the binary tree in an JFrame.
+	 */
 	public void show() {
-		this.component.show(true);
+		this.component.show();
 	}
-	
+
+	/**
+	 * closes the JFrame that the binary tree is displayed in.
+	 */
 	public void close() {
 		this.component.close();
 	}
-
 
 	/**
 	 * returns a string that gives the given time difference in easily read time units

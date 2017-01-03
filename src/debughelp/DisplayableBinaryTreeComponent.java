@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-
+// This class handles all the GUI logic
 public class DisplayableBinaryTreeComponent extends JComponent {
 	private static final long serialVersionUID = 2737198941294146621L;
 	private AbstractDisplayableBinaryTree tree;
@@ -118,7 +118,7 @@ public class DisplayableBinaryTreeComponent extends JComponent {
 		// System.out.println("DONE");
 	}
 	
-	public void show(boolean visable) {
+	public void show() {
 		if (this.frame != null) {
 			this.frame.toFront();
 			return;
@@ -127,14 +127,13 @@ public class DisplayableBinaryTreeComponent extends JComponent {
 		this.frame.setFocusable(true);
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.frame.setMinimumSize(new Dimension(this.tree.slowSize() * 20 + 18, this.tree.slowHeight() * 20 + 45));
-		System.out.println(new Dimension(this.tree.slowSize() * 20 + 18, this.tree.slowHeight() * 20 + 45));
 		this.frame.setSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
 //		System.out.println(new Dimension(this.width, this.height));
 		// set the background color to a stormy gray
 		this.frame.getContentPane().setBackground(BACKGROUND_COLOR);
 		// add the tree to the frame
 		this.frame.getContentPane().add(this);
-		this.frame.setVisible(visable);
+		this.frame.setVisible(true);
 		this.frame.toFront();
 		this.shouldRun.set(true);
 		Runnable repainter = new Runnable() {
@@ -162,19 +161,4 @@ public class DisplayableBinaryTreeComponent extends JComponent {
 		shouldRun.set(false);
 		this.frame.dispose();
 	}
-
-	/**
-	 * Sets the default size for the next window displayed.
-	 * 
-	 * @param windowWidth
-	 *            in pixels
-	 * @param windowHeight
-	 *            in pixels
-	 */
-	@Override
-	public void setSize(int windowWidth, int windowHeight) {
-		this.width = windowWidth;
-		this.height = windowHeight;
-	}
-
 }
